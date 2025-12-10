@@ -42,7 +42,7 @@
         "s3TemplateURL": "https://s3.amazonaws.com/amplify-lmsappv2-dev-4facd-deployment/amplify-cfn-templates/auth/lmsappv246d5210f-cloudformation-template.json",
         "logicalId": "authlmsappv246d5210f"
       },
-      "lastPushTimeStamp": "2025-12-10T04:28:06.313Z",
+      "lastPushTimeStamp": "2025-12-10T10:46:00.238Z",
       "output": {
         "UserPoolId": "us-east-1_hGvyRsfjv",
         "AppClientIDWeb": "2s5lckjoivseppk05b8825dn96",
