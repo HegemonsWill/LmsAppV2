@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { bookService } from '../services/api';
 import { Book } from '../types';
+import { useToast } from '../context/ToastContext';
+import Modal from '../components/Modal';
 
 const ManageBooks: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentBook, setCurrentBook] = useState<Partial<Book>>({});
+  const { showToast } = useToast();
   
   const [formData, setFormData] = useState({
     title: '', author: '', isbn: '', category: '',
@@ -27,6 +30,25 @@ const ManageBooks: React.FC = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const openModal = (book?: Book) => {
+      if (book) {
+        setCurrentBook(book);
+        setFormData({
+            title: book.title, author: book.author, isbn: book.isbn, category: book.category,
+            publishYear: book.publishYear || new Date().getFullYear(), totalCopies: book.totalCopies,
+            description: book.description || '', coverUrl: book.coverUrl, location: book.location || ''
+        });
+      } else {
+        setCurrentBook({});
+        setFormData({
+            title: '', author: '', isbn: '', category: '',
+            publishYear: new Date().getFullYear(), totalCopies: 1,
+            description: '', coverUrl: '', location: ''
+        });
+      }
+      setIsModalOpen(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -34,50 +56,31 @@ const ManageBooks: React.FC = () => {
         ...formData,
         publishYear: Number(formData.publishYear),
         totalCopies: Number(formData.totalCopies),
-        availableCopies: Number(formData.totalCopies),
+        availableCopies: Number(formData.totalCopies), // Simple logic: reset available on edit/create
         description: formData.description || 'No description provided.',
         coverUrl: formData.coverUrl || 'https://picsum.photos/200/300'
       };
 
-      if (isEditing && currentBook.id) {
+      if (currentBook.id) {
         await bookService.update({ ...currentBook as Book, ...bookPayload });
+        showToast('Book updated successfully', 'success');
       } else {
         await bookService.add(bookPayload);
+        showToast('Book created successfully', 'success');
       }
-      resetForm();
+      setIsModalOpen(false);
       loadBooks();
     } catch (err) {
-      console.error(err);
-      alert('Operation failed');
+      showToast('Operation failed', 'error');
     }
-  };
-
-  const startEdit = (book: Book) => {
-    setIsEditing(true);
-    setCurrentBook(book);
-    setFormData({
-      title: book.title, author: book.author, isbn: book.isbn, category: book.category,
-      publishYear: book.publishYear, totalCopies: book.totalCopies,
-      description: book.description, coverUrl: book.coverUrl, location: book.location || ''
-    });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = async (id: string) => {
     if(window.confirm('Delete this book permanently?')) {
         await bookService.delete(id);
+        showToast('Book deleted', 'success');
         loadBooks();
     }
-  };
-
-  const resetForm = () => {
-    setIsEditing(false);
-    setCurrentBook({});
-    setFormData({
-      title: '', author: '', isbn: '', category: '',
-      publishYear: new Date().getFullYear(), totalCopies: 1,
-      description: '', coverUrl: '', location: ''
-    });
   };
 
   const InputField = ({ label, name, type = "text", ...props }: any) => (
@@ -93,11 +96,65 @@ const ManageBooks: React.FC = () => {
   );
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-[calc(100vh-140px)]">
-      {/* Form Section */}
-      <div className="lg:col-span-4 bg-white p-8 rounded-[32px] shadow-lg border border-gray-100 overflow-y-auto">
-        <h2 className="text-2xl font-display font-bold text-gray-900 mb-6">{isEditing ? 'Edit Book' : 'Add New Book'}</h2>
-        <form onSubmit={handleSubmit}>
+    <div className="space-y-8">
+      <div className="flex justify-between items-center bg-white p-8 rounded-[32px] shadow-sm border border-gray-100">
+            <div>
+                    <h1 className="text-3xl font-display font-bold text-gray-900 mb-2">Books Inventory</h1>
+                    <p className="text-gray-500">Manage catalog, stock, and details.</p>
+            </div>
+            <button 
+                onClick={() => openModal()}
+                className="brand-gradient text-white px-6 py-3 rounded-2xl font-bold shadow-lg hover:shadow-xl hover:opacity-90 transition-all flex items-center gap-2"
+            >
+                <span>+ Add Book</span>
+            </button>
+      </div>
+
+      <div className="bg-white rounded-[32px] shadow-lg border border-gray-100 overflow-hidden flex flex-col">
+         <div className="overflow-x-auto">
+            <table className="min-w-full">
+                <thead className="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                        <th className="px-8 py-5 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Book</th>
+                        <th className="px-8 py-5 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Category</th>
+                        <th className="px-8 py-5 text-left text-xs font-bold text-gray-400 uppercase tracking-widest">Copies</th>
+                        <th className="px-8 py-5 text-right text-xs font-bold text-gray-400 uppercase tracking-widest">Actions</th>
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                    {books.map(book => (
+                        <tr key={book.id} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="px-8 py-6">
+                                <div className="flex items-center gap-4">
+                                     <img src={book.coverUrl} className="h-16 w-12 object-cover rounded-lg shadow-sm bg-gray-200" alt="" />
+                                     <div>
+                                         <p className="font-display font-bold text-gray-900 text-lg">{book.title}</p>
+                                         <p className="text-sm text-gray-500 font-medium">{book.author}</p>
+                                         <p className="text-xs text-gray-400 font-mono mt-1">{book.isbn}</p>
+                                     </div>
+                                </div>
+                            </td>
+                            <td className="px-8 py-6">
+                                <span className="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-xs font-bold uppercase">{book.category}</span>
+                            </td>
+                            <td className="px-8 py-6 text-sm font-bold text-gray-900">
+                                {book.availableCopies} / {book.totalCopies}
+                            </td>
+                            <td className="px-8 py-6 text-right">
+                                <div className="flex justify-end gap-2">
+                                    <button onClick={() => openModal(book)} className="p-2 text-gray-400 hover:text-blue-600 transition-colors">Edit</button>
+                                    <button onClick={() => handleDelete(book.id)} className="p-2 text-gray-400 hover:text-red-600 transition-colors">Delete</button>
+                                </div>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+         </div>
+      </div>
+
+      <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={currentBook.id ? 'Edit Book' : 'Add New Book'}>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <InputField label="Book Title" name="title" value={formData.title} onChange={handleInputChange} required />
           <InputField label="Author" name="author" value={formData.author} onChange={handleInputChange} required />
           
@@ -123,42 +180,13 @@ const ManageBooks: React.FC = () => {
            
           <InputField label="Cover Image URL" name="coverUrl" value={formData.coverUrl} onChange={handleInputChange} placeholder="https://..." />
           
-          <div className="flex gap-3 pt-6 mt-2">
-            <button type="submit" className="flex-1 brand-gradient text-white font-bold py-3.5 px-6 rounded-xl shadow-lg hover:shadow-xl hover:opacity-90 transition-all">
-                {isEditing ? 'Save Changes' : 'Create Book'}
+          <div className="pt-4">
+            <button type="submit" className="w-full brand-gradient text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl hover:opacity-90 transition-all">
+                {currentBook.id ? 'Save Changes' : 'Create Book'}
             </button>
-            {isEditing && (
-                <button type="button" onClick={resetForm} className="bg-gray-100 text-gray-600 font-bold py-3.5 px-6 rounded-xl hover:bg-gray-200 transition-all">
-                    Cancel
-                </button>
-            )}
           </div>
         </form>
-      </div>
-
-      {/* List Section */}
-      <div className="lg:col-span-8 bg-white rounded-[32px] shadow-lg border border-gray-100 overflow-hidden flex flex-col">
-         <div className="p-6 border-b border-gray-100 bg-gray-50/50">
-            <h3 className="text-lg font-display font-bold text-gray-900">Inventory ({books.length})</h3>
-         </div>
-         <div className="overflow-y-auto p-4 space-y-3">
-            {books.map(book => (
-                <div key={book.id} className="group p-4 rounded-2xl bg-white border border-gray-100 hover:border-red-100 hover:shadow-md transition-all flex justify-between items-center">
-                    <div className="flex items-center gap-5">
-                         <img src={book.coverUrl} className="h-16 w-12 object-cover rounded-lg shadow-sm bg-gray-200" alt="" />
-                         <div>
-                             <p className="font-display font-bold text-gray-900 text-lg">{book.title}</p>
-                             <p className="text-sm text-gray-500 font-medium">{book.author} <span className="text-gray-300 mx-2">•</span> {book.category}</p>
-                         </div>
-                    </div>
-                    <div className="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button onClick={() => startEdit(book)} className="bg-blue-50 text-blue-600 hover:bg-blue-100 px-4 py-2 rounded-lg text-sm font-bold transition-colors">Edit</button>
-                        <button onClick={() => handleDelete(book.id)} className="bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg text-sm font-bold transition-colors">Delete</button>
-                    </div>
-                </div>
-            ))}
-         </div>
-      </div>
+      </Modal>
     </div>
   );
 };

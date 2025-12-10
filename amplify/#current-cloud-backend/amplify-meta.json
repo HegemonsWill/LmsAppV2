@@ -1,0 +1,58 @@
+{
+  "providers": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-lmsappv2-dev-4facd-authRole",
+      "UnauthRoleArn": "arn:aws:iam::135973919500:role/amplify-lmsappv2-dev-4facd-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::135973919500:role/amplify-lmsappv2-dev-4facd-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-lmsappv2-dev-4facd-deployment",
+      "UnauthRoleName": "amplify-lmsappv2-dev-4facd-unauthRole",
+      "StackName": "amplify-lmsappv2-dev-4facd",
+      "StackId": "arn:aws:cloudformation:us-east-1:135973919500:stack/amplify-lmsappv2-dev-4facd/1ea925d0-d57f-11f0-b1a8-1223dcaa421d",
+      "AmplifyAppId": "d378adatvparql"
+    }
+  },
+  "auth": {
+    "lmsappv246d5210f": {
+      "service": "Cognito",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [],
+      "customAuth": false,
+      "frontendAuthConfig": {
+        "socialProviders": [],
+        "usernameAttributes": [
+          "EMAIL"
+        ],
+        "signupAttributes": [
+          "EMAIL"
+        ],
+        "passwordProtectionSettings": {
+          "passwordPolicyMinLength": 8,
+          "passwordPolicyCharacters": []
+        },
+        "mfaConfiguration": "OFF",
+        "mfaTypes": [
+          "SMS"
+        ],
+        "verificationMechanisms": [
+          "EMAIL"
+        ]
+      },
+      "providerMetadata": {
+        "s3TemplateURL": "https://s3.amazonaws.com/amplify-lmsappv2-dev-4facd-deployment/amplify-cfn-templates/auth/lmsappv246d5210f-cloudformation-template.json",
+        "logicalId": "authlmsappv246d5210f"
+      },
+      "lastPushTimeStamp": "2025-12-10T04:28:06.313Z",
+      "output": {
+        "UserPoolId": "us-east-1_hGvyRsfjv",
+        "AppClientIDWeb": "2s5lckjoivseppk05b8825dn96",
+        "AppClientID": "18h3cfj3ij3hil66fbcg0lnv1j",
+        "IdentityPoolId": "us-east-1:b94d0369-0926-4845-99a8-576d8c3a0efd",
+        "UserPoolArn": "arn:aws:cognito-idp:us-east-1:135973919500:userpool/us-east-1_hGvyRsfjv",
+        "IdentityPoolName": "lmsappv246d5210f_identitypool_46d5210f__dev",
+        "UserPoolName": "lmsappv246d5210f_userpool_46d5210f"
+      },
+      "lastPushDirHash": "A4+IoxuPsqIUnmzeBDOke/Zpknk="
+    }
+  }
+}

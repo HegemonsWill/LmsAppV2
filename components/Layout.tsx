@@ -1,6 +1,8 @@
 import React from 'react';
 import { User, UserRole } from '../types';
 import { useNavigate, useLocation } from 'react-router-dom';
+import NotificationBell from './NotificationBell';
+import { useNotifications } from '../context/NotificationContext';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -11,24 +13,32 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { pendingCount } = useNotifications();
 
   if (!user) {
     return <div className="min-h-screen bg-[#F7F9FC] flex items-center justify-center">{children}</div>;
   }
 
-  const NavItem = ({ path, label, icon }: { path: string; label: string; icon: React.ReactNode }) => {
+  const NavItem = ({ path, label, icon, badge }: { path: string; label: string; icon: React.ReactNode; badge?: number }) => {
     const isActive = location.pathname === path;
     return (
       <button
         onClick={() => navigate(path)}
-        className={`w-full flex items-center px-6 py-4 text-sm font-semibold transition-all duration-300 rounded-2xl mb-2 ${
+        className={`w-full flex items-center justify-between px-6 py-4 text-sm font-semibold transition-all duration-300 rounded-2xl mb-2 ${
           isActive 
             ? 'brand-gradient text-white shadow-lg shadow-red-500/30' 
             : 'text-gray-500 hover:bg-red-50 hover:text-[#D81814]'
         }`}
       >
-        <span className="mr-4 text-xl">{icon}</span>
-        {label}
+        <div className="flex items-center">
+            <span className="mr-4 text-xl">{icon}</span>
+            {label}
+        </div>
+        {badge !== undefined && badge > 0 && (
+             <span className="bg-white text-[#D81814] text-xs font-bold px-2 py-0.5 rounded-full shadow-sm">
+                 {badge}
+             </span>
+        )}
       </button>
     );
   };
@@ -36,7 +46,7 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
   return (
     <div className="flex h-screen bg-[#F7F9FC] overflow-hidden font-sans">
       {/* Sidebar */}
-      <aside className="w-72 bg-white m-4 rounded-[32px] shadow-xl flex flex-col hidden md:flex border border-gray-100">
+      <aside className="w-72 bg-white m-4 rounded-[32px] shadow-xl flex flex-col hidden md:flex border border-gray-100 z-20">
         <div className="h-24 flex items-center px-8 border-b border-gray-50">
           <div className="w-10 h-10 brand-gradient rounded-xl flex items-center justify-center mr-3 shadow-md">
              <span className="text-white font-display font-bold text-lg">lt</span>
@@ -54,9 +64,13 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
           {(user.role === UserRole.ADMIN || user.role === UserRole.LIBRARIAN) && (
             <div className="mb-8">
               <p className="px-6 text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Admin</p>
-              <NavItem path="/manage-books" label="Manage Books" icon="✏️" />
-              <NavItem path="/reservations" label="Reservations" icon="📅" />
+              <NavItem path="/issue-book" label="Issue Book" icon="📤" />
               <NavItem path="/active-loans" label="Active Loans" icon="🔄" />
+              <NavItem path="/requests" label="Requests" icon="📬" badge={pendingCount} />
+              <NavItem path="/manage-books" label="Inventory" icon="✏️" />
+              {user.role === UserRole.ADMIN && (
+                  <NavItem path="/members" label="Members" icon="👥" />
+              )}
             </div>
           )}
 
@@ -66,6 +80,11 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
               <NavItem path="/my-books" label="My Loans" icon="📖" />
             </div>
           )}
+          
+          <div className="mb-8">
+            <p className="px-6 text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Account</p>
+            <NavItem path="/settings" label="Settings" icon="⚙️" />
+          </div>
         </div>
 
         <div className="p-6 border-t border-gray-50">
@@ -89,20 +108,34 @@ const Layout: React.FC<LayoutProps> = ({ children, user, onLogout }) => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto focus:outline-none p-4 md:p-6">
-        <header className="bg-white shadow-xl rounded-2xl mb-6 md:hidden h-20 flex items-center justify-between px-6">
+      <main className="flex-1 overflow-auto focus:outline-none p-4 md:p-6 relative">
+        {/* Desktop Top Header (Visible only on MD+) */}
+        <div className="hidden md:flex justify-end items-center mb-6 gap-6">
+            {(user.role === UserRole.ADMIN || user.role === UserRole.LIBRARIAN) && (
+                <NotificationBell />
+            )}
+        </div>
+
+        {/* Mobile Header */}
+        <header className="bg-white shadow-xl rounded-2xl mb-6 md:hidden h-20 flex items-center justify-between px-6 z-10 relative">
              <div className="flex items-center">
                 <div className="w-8 h-8 brand-gradient rounded-lg flex items-center justify-center mr-2">
                     <span className="text-white font-display font-bold text-sm">lt</span>
                 </div>
                 <span className="text-xl font-display font-bold text-gray-900">LibraTech</span>
              </div>
-             <button onClick={onLogout} className="text-gray-500 hover:text-red-600">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-             </button>
+             <div className="flex items-center gap-4">
+                 {(user.role === UserRole.ADMIN || user.role === UserRole.LIBRARIAN) && (
+                    <NotificationBell />
+                 )}
+                 <button onClick={onLogout} className="text-gray-500 hover:text-red-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                 </button>
+             </div>
         </header>
+
         <div className="max-w-7xl mx-auto">
           {children}
         </div>

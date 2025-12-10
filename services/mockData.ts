@@ -1,4 +1,4 @@
-import { User, UserRole, Book, BorrowRecord, Reservation, BorrowStatus } from '../types';
+import { User, UserRole, Book, BorrowRecord, Reservation, BorrowStatus, BookRequest, RequestStatus } from '../types';
 
 export const INITIAL_USERS: User[] = [
   {
@@ -6,21 +6,33 @@ export const INITIAL_USERS: User[] = [
     name: 'Admin User',
     email: 'admin@library.com',
     role: UserRole.ADMIN,
-    avatarUrl: 'https://picsum.photos/seed/admin/200'
+    avatarUrl: 'https://picsum.photos/seed/admin/200',
+    isTwoFactorEnabled: false
   },
   {
     id: '2',
     name: 'Sarah Librarian',
     email: 'sarah@library.com',
     role: UserRole.LIBRARIAN,
-    avatarUrl: 'https://picsum.photos/seed/sarah/200'
+    avatarUrl: 'https://picsum.photos/seed/sarah/200',
+    isTwoFactorEnabled: false
   },
   {
     id: '3',
     name: 'John Doe',
     email: 'john@user.com',
     role: UserRole.USER,
-    avatarUrl: 'https://picsum.photos/seed/john/200'
+    avatarUrl: 'https://picsum.photos/seed/john/200',
+    isTwoFactorEnabled: true,
+    twoFactorSecret: 'JBSWY3DPEHPK3PXP' // Mock secret for demo (Base32)
+  },
+  {
+    id: '4',
+    name: 'Jane Doe',
+    email: 'jane@user.com',
+    role: UserRole.USER,
+    avatarUrl: 'https://picsum.photos/seed/jane/200',
+    isTwoFactorEnabled: false
   }
 ];
 
@@ -102,4 +114,18 @@ export const INITIAL_RESERVATIONS: Reservation[] = [
         bookTitle: 'To Kill a Mockingbird',
         userName: 'John Doe'
     }
+];
+
+export const INITIAL_REQUESTS: BookRequest[] = [
+  {
+    id: 'req1',
+    bookId: 'b2',
+    userId: '4',
+    bookTitle: 'Clean Code',
+    bookCoverUrl: 'https://picsum.photos/seed/cleancode/300/450',
+    userName: 'Jane Doe',
+    userAvatarUrl: 'https://picsum.photos/seed/jane/200',
+    requestedAt: new Date(Date.now() - 10000000).toISOString(),
+    status: RequestStatus.PENDING
+  }
 ];
