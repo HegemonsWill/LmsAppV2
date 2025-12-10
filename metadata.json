@@ -1,0 +1,5 @@
+{
+  "name": "LibraTech LMS",
+  "description": "A modern, cloud-native Library Management System featuring role-based access for Admins, Librarians, and Users. Includes book cataloging, borrowing workflows, and reservation management.",
+  "requestFramePermissions": []
+}
