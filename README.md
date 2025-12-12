@@ -1,20 +1,70 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 📚 LibraTech LMS  
+A modern, cloud-native **Library Management System** built with **React + Vite + AWS Amplify**, featuring secure authentication, CI/CD automation, and scalable cloud architecture.
 
-# Run and deploy your AI Studio app
+---
 
-This contains everything you need to run your app locally.
+## 🚀 Features
+- 🔐 **AWS Cognito Authentication** (Amplify Authenticator UI)
+- 🏗️ **Fully automated CI/CD** via GitHub → Amplify Hosting  
+- ⚡ **Vite + React** frontend with modular components  
+- 🌐 **Global CDN Deployment** (zero downtime)  
+- 🔔 **Book Request System & Notification Bell**  
+- 🎨 Custom UI theme (gradient red background + white cards + brand logo)  
+- 🧩 Clean folder structure & reusable UI components  
 
-View your app in AI Studio: https://ai.studio/apps/drive/1gmZZhie5c9K_lgx-fGcFeLohtEhfIbZQ
+---
 
-## Run Locally
+## 🛠️ Tech Stack
+**Frontend:**  
+- React 19  
+- Vite  
+- Tailwind (optional)  
+- React Router  
 
-**Prerequisites:**  Node.js
+**Cloud Services:**  
+- AWS Amplify Hosting  
+- Amazon Cognito (User Pools)  
+- AWS SSM Parameter Store  
+- (Upcoming) DynamoDB + Lambda  
+
+---
+
+## ⚙️ CI/CD Pipeline
+This project uses **Amplify Hosting** with GitHub integration:
+
+- Every `git push` triggers:
+  1. `npm ci`  
+  2. `vite build`  
+  3. Deploy to global AWS CDN  
+- Automatic previews for feature branches (if enabled)
+
+---
+
+## 🧱 Project Structure
+/src
+/components
+/pages
+/auth
+/assets
+amplify/
+public/
+index.html
+vite.config.js
+aws-exports.js
+
+---
+
+## 🔧 Setup (Local Development)
+
+```bash
+git clone https://github.com/<your-username>/lmsappv2.git
+cd lmsappv2
+npm install
+npm run dev
+The app will run on:
+➡️ http://localhost:5173/
 
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+🌍 Live Production URL
+
+👉 https://main.d378adatvparql.amplifyapp.com
