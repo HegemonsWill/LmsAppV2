@@ -1,4 +1,4 @@
-# LibraTech LMS  
+# Cloud-native **Library Management System
 A modern, cloud-native **Library Management System** built with **React + Vite + AWS Amplify**, featuring secure authentication, CI/CD automation, and scalable cloud architecture.
 
 ---
